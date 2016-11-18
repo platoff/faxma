@@ -99,15 +99,18 @@ proc remove[T](ml: var Matchlist[T], c: int): Operation =
   ml.list.delete(c)
 
 proc insert[T](ml: var Matchlist[T], op: Operation, c: int) =
-#  echo "insert at ", c, " op ", op, " list: ", ml
-  if c < ml.list.len:
-    echo "try to join"
-    let target = ml.list[c] 
+  echo "insert at ", c, " op ", op, " list: ", ml
+  if c > 0 and c <= ml.list.len:
+    let target = ml.list[c-1] 
+    echo "try to join target: ", target, " op: ", op
     if target.kind == op.kind and target.rng.b == op.rng.a:
       echo "hoorah! joining"
-      ml.list[c].rng.b = op.rng.b
+      ml.list[c-1].rng.b = op.rng.b
       return
-  ml.list.insert(op, c)
+  if c == ml.list.len:
+    ml.list.add(op)
+  else:
+    ml.list.insert(op, c)    
 
 proc findmatch[T](u: Subseq[T], v: var Matchlist[T], s: int, p: var int): Operation =
   echo "looking for ", u, " match in ", v, "p: ", p
@@ -119,9 +122,9 @@ proc findmatch[T](u: Subseq[T], v: var Matchlist[T], s: int, p: var int): Operat
       if op.kind == ins:
         var match: Slice[int]
         let subs = subseq(v.arr, op.rng)
-        echo "scanning: ", subs
+        #echo "scanning: ", subs
         if rollmatch(u, subs, s, match):
-          echo "FOUND!"
+          #echo "FOUND!"
           let r1 = op.rng.a..(op.rng.a + match.a)
           let r2 = (op.rng.a + match.b)..op.rng.b
           let copy = (op.rng.a + match.a)..(op.rng.a + match.b)
@@ -154,17 +157,19 @@ proc match[T](u, v: var Matchlist[T], s: int) =
       let subs = subseq(u.arr, t.rng)
       let c = findmatch(subs, v, s, p)
       if p != -1:        
-        insert(u.list, c, cu)
-        insert(u.list, insertOp((t.rng.a + c.len)..t.rng.b), cu + 1)
+        insert(u, c, cu)
+        insert(u, insertOp((t.rng.a + c.len)..t.rng.b), cu + 1)
         echo "matchlist: ", cu, " ", u        
       else:
         if t.rng.len > s:
+          echo "SPLIT!"
           let op1 = insertOp(t.rng.a..(t.rng.a + s))
-          insert(u.list, op1, cu)
+          insert(u, op1, cu)
           let op2 = insertOp((t.rng.a + s)..t.rng.b)
           insert(u.list, op2, cu + 1)
         else:
-          insert(u.list, t, cu)
+          insert(u, t, cu)
+        echo "more intervals: ", cu, " ", u        
     inc cu
 
 type
