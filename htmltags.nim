@@ -19,3 +19,4 @@ type
     `type`,
     value,
     width
+    title
