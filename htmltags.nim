@@ -1,6 +1,8 @@
 
 type
   Tag* {.pure.} = enum
+    DOCUMENT_ROOT
+    TEXT
     a,
     button,
     `div`,
@@ -13,6 +15,7 @@ type
     ul
     
   Attr* {.pure.} = enum
+    TEXT
     class,
     `for`,
     placeholder,
