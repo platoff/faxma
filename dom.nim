@@ -17,8 +17,8 @@ type
     nKids*: int
     nAttrs*: int
 
-  Buf = object
-    head: pointer
+  Buf* = object
+    head*: pointer
     tail: pointer
 
   DOMBuilder* = object
@@ -28,7 +28,7 @@ type
     strings: Buf
     dom: Buf
 
-template push[T](buf: var Buf, val: T) = 
+template push*[T](buf: var Buf, val: T) = 
   assert sizeof(T) == sizeof(int)
   cast[ptr T](buf.tail)[] = val
   buf.tail = cast[pointer](cast[int](buf.tail) +% sizeof(T))
@@ -138,7 +138,7 @@ proc done*(builder: var DOMBuilder) =
   builder.current = builder.elements.pop(Element)
   builder.current = builder.contentStack.pop(Element)
 
-proc initBuf(buf: var Buf, size: int) =
+proc initBuf*(buf: var Buf, size: int) =
   buf.head = alloc(size)
   buf.tail = buf.head
 
@@ -154,7 +154,7 @@ proc free(buf: var Buf) =
   buf.head = nil
   buf.tail = nil
 
-proc reset(buf: var Buf) =
+proc clear*(buf: var Buf) =
   buf.tail = buf.head
 
 proc free(builder: var DOMBuilder) =
@@ -164,13 +164,13 @@ proc free(builder: var DOMBuilder) =
   free(builder.strings)
 
 proc clear*(builder: var DOMBuilder) =
-  reset(builder.contentStack)
-  reset(builder.elements)
-  reset(builder.dom)
-  reset(builder.strings)
+  clear(builder.contentStack)
+  clear(builder.elements)
+  clear(builder.dom)
+  clear(builder.strings)
   openTag(builder, Tag.DOCUMENT_ROOT) 
 
-proc mem(buf: Buf): int = cast[int](buf.tail) -% cast[int](buf.head)
+proc mem*(buf: Buf): int = cast[int](buf.tail) -% cast[int](buf.head)
 
 proc `$`*(builder: DOMBuilder): string =
   result = "Memory usage:\n"

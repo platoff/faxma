@@ -21,7 +21,7 @@ proc getQuery(): Query =
   result.waiting = random(2) == 0
   case random(10)
   of 0: result.query = "vacuum"
-  of 1..2: result.query = "&lt;IDLE&gt; in transaction"
+  of 1..2: result.query = "<IDLE> in transaction"
   else: result.query = "SELECT blah FROM something"
 
 proc getDatabase(name: string): Database =
@@ -37,8 +37,8 @@ proc getDatabase(name: string): Database =
 proc getData*(): Data =
   new result
   for i in 0..< ROWS:
-    result.databases[i*2] = getDatabase("cluster" & $i)
-    result.databases[i*2+1] = getDatabase("cluster" & $i & "slave")
+    result.databases[i*2] = getDatabase("cluster" & $(i+1))
+    result.databases[i*2+1] = getDatabase("cluster" & $(i+1) & "slave")
 
 #
 # Generate DOM
@@ -102,7 +102,7 @@ proc render*(data: Data, builder: var DOMBuilder) =
         builder.openTag(Tag.td) # td
         builder.attr(Attr.class, "Query")
         builder.attr(Attr.width, "40")
-        builder.text("&nbsp;")
+        builder.text(" ")
         builder.closeTag() # /td
 
     builder.closeTag() # /tr

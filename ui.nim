@@ -2,14 +2,32 @@
 proc JSrender(p: pointer) {.importc.}
 
 import dbmonster, dom, strutils
+import times, random, diff, bytes
 
-var builder = initDOMBuilder()
+randomize(2543543)
 
-let data = getData()
-data.render(builder)
+var a = initDOMBuilder()
+var b = initDOMBuilder()
+var patch = initPatch()
 
-builder.done()
+const ITERS = 1000
+let start = cpuTime()
 
-echo builder.current.kids[0]
+for i in 0..<ITERS:
+  patch.clear()
+  let data = getData()
+  if i mod 2 == 1:
+    b.clear()
+    data.render(b)
+    patch.diff(b.current, a.current)
+  else:
+    a.clear()
+    data.render(a)
+    patch.diff(a.current, b.current)
+  patch.done()
+  
+  #echo "patch: ", initBytes(patch.data.head, patch.data.mem)
+  JSrender(patch.data.head)
 
-JSrender(builder.current.kids[0])
+echo "Iteration time: ", formatFloat((cpuTime() - start) * 1000 / ITERS, ffDecimal, 3), " ms"
+
