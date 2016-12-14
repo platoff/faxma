@@ -38,7 +38,7 @@ proc getData*(): Data =
   new result
   for i in 0..< ROWS:
     result.databases[i*2] = getDatabase("cluster" & $(i+1))
-    result.databases[i*2+1] = getDatabase("cluster" & $(i+1) & "slave")
+    result.databases[i*2+1] = getDatabase("cluster" & $(i+1) & " slave")
 
 #
 # Generate DOM
