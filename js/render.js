@@ -3,13 +3,13 @@ mergeInto(LibraryManager.library, {
 
   $attributeNames: ["TEXT", "class", "for", "placeholder", "type", "value", "width", "title"],
 
+  $tags: [
+    "DOCUMENT_ROOT", "TEXT", "a", "button", "div", "h1", "header", "hr", "input",
+    "label", "li", "p", "section", "span", "table", "tbody", "td", "tr", "ul"
+  ],
+
   $renderElement: function (p) {
     p = p | 0;
-
-    const tags = [
-      "DOCUMENT_ROOT", "TEXT", "a", "button", "div", "h1", "header", "hr", "input",
-      "label", "li", "p", "section", "span", "table", "tbody", "td", "tr", "ul"
-    ];
 
     var t = HEAP32[((p)>>2)];
     p += 4;
@@ -49,7 +49,7 @@ mergeInto(LibraryManager.library, {
     }
     return e;
   },
-  $renderElement__deps: ["$attributeNames"],  
+  $renderElement__deps: ["$attributeNames", "$tags"],  
 
   JSrender: function(p) {
     p = p | 0;

@@ -2,16 +2,16 @@
 proc JSrender(p: pointer) {.importc.}
 
 import dbmonster, dom, strutils
-import times, random, diff, bytes, emscripten
+import times, diff, bytes, emscripten
 
 GC_disable()
-
-randomize(2543543)
 
 var a = initDOMBuilder()
 var b = initDOMBuilder()
 var patch = initPatch()
 var i = 0
+
+let start = cpuTime()
 
 proc loop() {.cdecl.} =
   patch.clear()
@@ -35,7 +35,11 @@ proc loop() {.cdecl.} =
   #GC_step 100
   inc i
 
-emscripten_set_main_loop(loop, -1, 0)
+  if i mod 1000 == 0:
+    echo "FPS: ", formatFloat(float(i) / (cpuTime() - start), ffDecimal, 2)
+    
+
+emscripten_set_main_loop(loop, 60, 1)
 
 #echo "Iteration time: ", formatFloat((cpuTime() - start) * 1000 / ITERS, ffDecimal, 3), " ms"
 

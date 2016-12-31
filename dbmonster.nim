@@ -1,12 +1,12 @@
 
-import math, random, algorithm, dom, htmltags, strutils
+import math, mersenne, algorithm, dom, htmltags, strutils
 
 const ROWS = 100
 
 type
   Query* = object
     query*: string
-    elapsed*: float
+    elapsed*: int
     waiting: bool
 
   Database* = object 
@@ -15,9 +15,14 @@ type
 
   Data* = ref object 
     databases*: array[ROWS * 2, Database]
-    
+
+var tw = newMersenneTwister(556)
+
+template random(m: int): untyped =
+  int(tw.getNum) %% m
+
 proc getQuery(): Query =
-  result.elapsed = random(15.0)
+  result.elapsed = random(1500)
   result.waiting = random(2) == 0
   case random(10)
   of 0: result.query = "vacuum"
@@ -53,31 +58,32 @@ proc className(db: Database): cstring =
     result = "label label-success"
   
 proc className(q: Query): cstring =
-  if q.elapsed >= 10.0:
+  if q.elapsed >= 1000:
     result = "Query elapsed warn_long"
-  elif q.elapsed >= 1.0:
+  elif q.elapsed >= 100:
     result = "Query elapsed warn"
   else:
     result = "Query elapsed short"
 
 proc render*(data: Data, builder: var DOMBuilder) =
   builder.openTag(Tag.table) # table
-  builder.attr(Attr.class, "table table-striped latest-data")
+  builder.attr(Attr.class, "table table-striped latest-data") 
   builder.openTag(Tag.tbody) # tbody
+  # control flow break !!!!!!!!!!!!!!!!
   for db in data.databases:
-    builder.openTag(Tag.tr) # tr
+    builder.openTag(Tag.tr) # tr           
 
-    builder.openTag(Tag.td) # td
-    builder.attr(Attr.class, "dbname")
-    builder.textString(db.name)
+    builder.openTag(Tag.td) # td           
+    builder.attr(Attr.class, "dbname") 
+    builder.textString(db.name)   # !!!!!!!!!!!!!
     builder.closeTag() # /td
 
     let length = db.queries.len
     builder.openTag(Tag.td) # td
     builder.attr(Attr.class, "query-count")
     builder.openTag(Tag.span) #span
-    builder.attr(Attr.class, className(db))
-    builder.textString($length)
+    builder.attr(Attr.class, className(db)) # !!!!!!!!
+    builder.textString($length)  # !!!!!!!!!!!
     builder.closeTag() # /span
     builder.closeTag() # /td
 
@@ -86,7 +92,11 @@ proc render*(data: Data, builder: var DOMBuilder) =
         let query = db.queries[i]
         builder.openTag(Tag.td) # td
         builder.attr(Attr.class, className(query))
-        builder.textString(formatFloat(query.elapsed, ffDecimal, 2))
+        #let s = formatFloat(query.elapsed, ffDecimal, 2)
+        var s = $(query.elapsed div 100)
+        s.add '.'
+        s.add $(query.elapsed mod 100)
+        builder.textString(s)
         builder.openTag(Tag.`div`) # div
         builder.attr(Attr.class, "popover left")
         builder.openTag(Tag.`div`) # div
@@ -101,7 +111,7 @@ proc render*(data: Data, builder: var DOMBuilder) =
       else:
         builder.openTag(Tag.td) # td
         builder.attr(Attr.class, "Query")
-        builder.attr(Attr.width, "40")
+        #builder.attr(Attr.width, "40")
         builder.text(" ")
         builder.closeTag() # /td
 
@@ -109,6 +119,7 @@ proc render*(data: Data, builder: var DOMBuilder) =
 
   builder.closeTag() # /tbody
   builder.closeTag() # /table
+
 
 when isMainModule:
   var builder = initDOMBuilder()

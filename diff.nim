@@ -178,9 +178,10 @@ proc done*(patch: var Patch) =
 
 when isMainModule:
 
-  import dbmonster, random, times
+  import dbmonster, times
 
-  randomize(2543543)
+  GC_Disable()
+
 
   var a = initDOMBuilder()
   var b = initDOMBuilder()
@@ -190,6 +191,9 @@ when isMainModule:
   let start = cpuTime()
 
   for i in 0..<ITERS:
+    GC_Enable()
+    let x = newString(0)
+    GC_Disable()
     patch.clear()
     let data = getData()
     if i mod 2 == 1:
